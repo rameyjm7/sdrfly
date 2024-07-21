@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live FFT Plot</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Live FFT Plot</h1>
+    <div id="plot"></div>
+
+    <script>
+        var layout = {
+            title: 'Live FFT Plot',
+            xaxis: {
+                title: 'Frequency (Hz)'
+            },
+            yaxis: {
+                title: 'Magnitude (dB)'
+            }
+        };
+
+        function updatePlot(data) {
+            var trace = {
+                x: Array.from({length: data.length}, (_, i) => i), // Create a range for the x-axis
+                y: data,
+                type: 'scatter'
+            };
+
+            Plotly.newPlot('plot', [trace], layout);
+        }
+
+        async function fetchData() {
+            const response = await fetch('/data');
+            const data = await response.json();
+            updatePlot(data);
+        }
+
+        setInterval(fetchData, 1000); // Fetch data every second
+    </script>
+</body>
+</html>

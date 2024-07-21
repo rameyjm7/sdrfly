@@ -1,0 +1,107 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sdrfly"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = []
+authors = []
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "click",
+  "scipy",
+  "matplotlib"
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.urls]
+Documentation = "https://github.com/unknown/sdrfly#readme"
+Issues = "https://github.com/unknown/sdrfly/issues"
+Source = "https://github.com/unknown/sdrfly"
+
+[project.scripts]
+sdrfly = "sdrfly.cli:sdrfly"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/sdrfly/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+cov-xml = [
+  "coverage run -m pytest --junitxml=nosetests.xml {args:tests}",
+  "cov-report",
+  "coverage xml"
+]
+
+[tool.hatch.envs.default.env-vars]
+PIP_TRUSTED_HOST = "playmaker-git"
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/sdrfly tests}"
+
+[tool.coverage.run]
+source_pkgs = ["sdrfly", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/sdrfly/__about__.py",
+]
+
+[tool.coverage.paths]
+sdrfly = ["src/sdrfly", "*/sdrfly/src/sdrfly"]
+tests = ["tests", "*/sdrfly/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+line-length = 88
+exclude = ["src/sdrfly/api.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B", "N"]
+ignore = ["E501", "B011"]

@@ -1,0 +1,13 @@
+{
+    "START_FREQ": 2.407e9,
+    "END_FREQ": 2.48e9,
+    "STEP_FREQ": 1e6,
+    "SAMPLE_RATE": 20e6,
+    "BANDWIDTH": 20e6,
+    "NUM_SAMPLES": 1048576,
+    "PEAK_THRESHOLD": 0.5,
+    "GAIN": 40,
+    "NUM_CHANNELS": 20,
+    "NUM_THREADS": 10,
+    "TARGET_LAP": "DA:4E:E9"
+}
