@@ -4,7 +4,7 @@
             "name": "Python Debugger: Module",
             "type": "debugpy",
             "request": "launch",
-            "module": "bluetooth_demod"
+            "module": "sdrfly"
         },
         {
             "name": "Python Debugger: Python File",

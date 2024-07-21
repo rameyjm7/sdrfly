@@ -38,7 +38,7 @@ def plot_fft_with_peak(samples, sample_rate, title, peak_freqs=None):
     plt.show()
 
 def plot_fft_and_relevant_plots(channel_samples, channel_idx, access_code, lap, sample_rate, channel_bw, min_power_level, max_power_level):
-    from bluetooth_demod.demodulators.demodulator_numba import GFSKDemodNumba
+    from sdrfly.demodulators.demodulator_numba import GFSKDemodNumba
 
     # Initialize the GFSK demodulator
     gfsk_demod = GFSKDemodNumba(kf=0.5)  # Adjust kf value as needed

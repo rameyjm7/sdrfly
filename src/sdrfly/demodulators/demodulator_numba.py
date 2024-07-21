@@ -1,6 +1,6 @@
 import numpy as np
 from numba import jit
-from bluetooth_demod.demodulators.demodulator_base import DemodulatorBase
+from sdrfly.demodulators.demodulator_base import DemodulatorBase
 
 class GFSKDemodNumba(DemodulatorBase):
     def __init__(self, kf=0.5):

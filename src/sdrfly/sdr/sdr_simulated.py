@@ -1,5 +1,5 @@
 import numpy as np
-from bluetooth_demod.sdr.sdr_base import SDR
+from sdrfly.sdr.sdr_base import SDR
 
 class SimulatedBluetoothSDR(SDR):
     def __init__(self, center_freq, sample_rate, bandwidth, gain):

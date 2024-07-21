@@ -2,7 +2,7 @@ import SoapySDR
 import numpy as np
 import logging
 import time
-from bluetooth_demod.sdr.sdr_base import SDR
+from sdrfly.sdr.sdr_base import SDR
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d %(levelname)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')

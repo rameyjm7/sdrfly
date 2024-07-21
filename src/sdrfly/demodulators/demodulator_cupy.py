@@ -1,5 +1,5 @@
 import cupy as cp
-from bluetooth_demod.demodulators.demodulator_base import DemodulatorBase
+from sdrfly.demodulators.demodulator_base import DemodulatorBase
 
 class GFSKDemod(DemodulatorBase):
     def __init__(self, kf=0.5):

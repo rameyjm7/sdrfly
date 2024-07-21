@@ -1,6 +1,6 @@
 import numpy as np
 import ctypes
-from bluetooth_demod.demodulators.demodulator_base import DemodulatorBase
+from sdrfly.demodulators.demodulator_base import DemodulatorBase
 
 # Load the LiquidDSP library
 libliquid = ctypes.CDLL('/usr/local/lib/libliquid.so')

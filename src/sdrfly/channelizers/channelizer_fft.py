@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.fftpack import fft, ifft
 from concurrent.futures import ThreadPoolExecutor
-from bluetooth_demod.channelizers.channelizer_base import ChannelizerBase
+from sdrfly.channelizers.channelizer_base import ChannelizerBase
 
 class ChannelizerFFT(ChannelizerBase):
     def __init__(self, num_channels=10, channel_bw=1e6, sample_rate=10e6):

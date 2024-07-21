@@ -1,6 +1,6 @@
 import cupy as cp
 import numpy as np
-from bluetooth_demod.demodulators.demodulator_base import DemodulatorBase
+from sdrfly.demodulators.demodulator_base import DemodulatorBase
 
 class GFSKDemodCuPy(DemodulatorBase):
     def __init__(self, kf):

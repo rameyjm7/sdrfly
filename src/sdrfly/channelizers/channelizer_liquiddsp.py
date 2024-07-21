@@ -1,6 +1,6 @@
 import numpy as np
 import ctypes
-from bluetooth_demod.channelizers.channelizer_base import ChannelizerBase
+from sdrfly.channelizers.channelizer_base import ChannelizerBase
 
 # Load the LiquidDSP library
 libliquid = ctypes.CDLL('/usr/local/lib/libliquid.so')

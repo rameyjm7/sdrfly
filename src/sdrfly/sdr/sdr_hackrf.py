@@ -1,7 +1,7 @@
 import numpy as np
 import SoapySDR
 import threading
-from bluetooth_demod.sdr.sdr_base import SDR
+from sdrfly.sdr.sdr_base import SDR
 
 class HackRFSdr(SDR):
     MAX_SAMPLES = 131072

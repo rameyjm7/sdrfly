@@ -1,6 +1,6 @@
 import click
 
-from bluetooth_demod.__about__ import __version__
+from sdrfly.__about__ import __version__
 
 
 @click.group(
@@ -8,5 +8,5 @@ from bluetooth_demod.__about__ import __version__
     invoke_without_command=True,
 )
 @click.version_option(version=__version__, prog_name="Proton Payload")
-def bluetooth_demod():
+def sdrfly():
     click.echo("Hello world!")
