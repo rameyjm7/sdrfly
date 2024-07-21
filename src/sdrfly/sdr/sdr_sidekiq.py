@@ -8,6 +8,8 @@ class SidekiqSdr(SDR):
 
     def __init__(self, center_freq, sample_rate, bandwidth, gain, size):
         super().__init__(center_freq, sample_rate, bandwidth, gain)
+        self.readsize = 1024*1018
+        self.sample_buffer = np.zeros(self.readsize, dtype=np.complex64)
         SoapySDR.setLogLevel(SoapySDR.SOAPY_SDR_INFO)
         results = SoapySDR.Device.enumerate("driver=sidekiq")
         if len(results) == 0:
@@ -23,8 +25,6 @@ class SidekiqSdr(SDR):
         self.running = False
         self.data_lock = threading.Lock()
         self.size = size
-        self.readsize = 1024*1018
-        self.sample_buffer = np.zeros(self.readsize, dtype=np.complex64)
         self.thread = threading.Thread(target=self._capture_thread)
         self.thread.daemon = True
 
