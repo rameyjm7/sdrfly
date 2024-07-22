@@ -53,7 +53,11 @@ class SidekiqSdr(SDR):
         return self.sample_buffer
 
     def set_frequency(self, freq):
-        self.sdr.setFrequency(SoapySDR.SOAPY_SDR_RX, 0, freq)
+        try:
+            self.sdr.setFrequency(SoapySDR.SOAPY_SDR_RX, 0, freq)
+        except Exception as e:
+            print(e)
+            pass
 
     def set_sample_rate(self, rate):
         self.sdr.setSampleRate(SoapySDR.SOAPY_SDR_RX, 0, rate)
