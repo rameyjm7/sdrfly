@@ -3,12 +3,14 @@ import SoapySDR
 import threading
 import matplotlib.pyplot as plt
 from sdrfly.sdr.sdr_base import SDR
+import time
+
 
 class SidekiqSdr(SDR):
 
     def __init__(self, center_freq, sample_rate, bandwidth, gain, size):
         super().__init__(center_freq, sample_rate, bandwidth, gain)
-        self.readsize = 1024*1018
+        self.readsize = 1024 * 1018
         self.sample_buffer = np.zeros(self.readsize, dtype=np.complex64)
         SoapySDR.setLogLevel(SoapySDR.SOAPY_SDR_INFO)
         results = SoapySDR.Device.enumerate("driver=sidekiq")
@@ -27,6 +29,7 @@ class SidekiqSdr(SDR):
         self.size = size
         self.thread = threading.Thread(target=self._capture_thread)
         self.thread.daemon = True
+        self.tx_thread = None  # Thread for async transmission
 
     def start(self):
         self.running = True
@@ -46,8 +49,7 @@ class SidekiqSdr(SDR):
     def capture_samples(self, num_samples):
         sr = self.sdr.readStream(self.rx_stream, [self.sample_buffer], self.readsize)
         if sr.ret > 0:
-            # print(f"Captured {sr.ret} samples")
-            """"""
+            pass  # Successfully captured samples
         else:
             print("Failed to read samples from SDR")
         return self.sample_buffer
@@ -57,7 +59,6 @@ class SidekiqSdr(SDR):
             self.sdr.setFrequency(SoapySDR.SOAPY_SDR_RX, 0, freq)
         except Exception as e:
             print(e)
-            pass
 
     def set_sample_rate(self, rate):
         self.sdr.setSampleRate(SoapySDR.SOAPY_SDR_RX, 0, rate)
@@ -100,7 +101,7 @@ class SidekiqSdr(SDR):
         samples = self.get_latest_samples()
         fft_result = np.fft.fftshift(np.fft.fft(samples))
         fft_magnitude = 20 * np.log10(np.abs(fft_result))
-        freq_axis = np.fft.fftshift(np.fft.fftfreq(len(samples), 1/self.sample_rate)) + self.center_freq
+        freq_axis = np.fft.fftshift(np.fft.fftfreq(len(samples), 1 / self.sample_rate)) + self.center_freq
 
         plt.figure(figsize=(10, 6))
         plt.plot(freq_axis / 1e6, fft_magnitude)
@@ -109,3 +110,31 @@ class SidekiqSdr(SDR):
         plt.ylabel('Magnitude (dB)')
         plt.grid()
         plt.show()
+
+    def transmit_data_async(self, samples, duration=1):
+        """
+        Transmit data asynchronously in a separate thread.
+
+        Parameters:
+            samples (np.array): The samples to transmit.
+            duration (float): Duration of the transmission in seconds.
+        """
+        if self.tx_thread is not None and self.tx_thread.is_alive():
+            print("A transmission is already in progress. Please wait for it to finish.")
+            return
+
+        def transmit():
+            try:
+                num_repeats = int(self.sample_rate * duration / len(samples))
+                repeated_samples = np.tile(samples, num_repeats)
+                print(f"Transmitting {len(repeated_samples)} samples asynchronously for {duration} seconds...")
+                self.transmit_samples(repeated_samples)
+                time.sleep(duration)
+                self.stop_transmission()
+                print("Asynchronous transmission complete.")
+            except Exception as e:
+                print(f"Error during asynchronous transmission: {e}")
+
+        self.tx_thread = threading.Thread(target=transmit)
+        self.tx_thread.daemon = True
+        self.tx_thread.start()
