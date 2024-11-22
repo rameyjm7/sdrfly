@@ -1,5 +1,8 @@
 # sdrfly
-a wrapper around SoapySDR to make things easier
+A wrapper around SoapySDR to make things easier
+
+Look under notebooks for some examples on how to use and plot stuff. Demo photos are shown below
+
 
 
 LTE at 751MHZ
