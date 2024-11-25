@@ -4,12 +4,19 @@ import threading
 import matplotlib.pyplot as plt
 from sdrfly.sdr.sdr_base import SDR
 import time
-
+import os
 
 class SidekiqSdr(SDR):
 
     def __init__(self, center_freq, sample_rate, bandwidth, gain, size):
         super().__init__(center_freq, sample_rate, bandwidth, gain)
+        # Suppress SoapySDR logs by redirecting stderr
+        self.devnull = open(os.devnull, 'w')
+        self.old_stderr = os.dup(2)  # Duplicate the existing stderr
+        os.dup2(self.devnull.fileno(), 2)  # Redirect stderr to /dev/null
+        
+        SoapySDR.setLogLevel(SoapySDR.SOAPY_SDR_ERROR)  # Set log level to error
+        
         self.readsize = 1024 * 1018
         self.sample_buffer = np.zeros(self.readsize, dtype=np.complex64)
         SoapySDR.setLogLevel(SoapySDR.SOAPY_SDR_INFO)
@@ -31,6 +38,15 @@ class SidekiqSdr(SDR):
         self.thread.daemon = True
         self.tx_thread = None  # Thread for async transmission
 
+        # Tracking read statistics
+        self.failed_reads = 0
+        self.total_reads = 0
+        self.last_report_time = time.time()
+
+    def __del__(self):
+        os.dup2(self.old_stderr, 2)  # Restore stderr
+        self.devnull.close()
+
     def start(self):
         self.running = True
         self.thread.start()
@@ -48,10 +64,19 @@ class SidekiqSdr(SDR):
 
     def capture_samples(self, num_samples):
         sr = self.sdr.readStream(self.rx_stream, [self.sample_buffer], self.readsize)
+        self.total_reads += 1  # Increment total reads
         if sr.ret > 0:
             pass  # Successfully captured samples
         else:
-            print("Failed to read samples from SDR")
+            self.failed_reads += 1  # Increment failed reads
+
+        # Print failure ratio once a minute
+        current_time = time.time()
+        if current_time - self.last_report_time > 60:  # 60 seconds interval
+            failure_ratio = self.failed_reads / self.total_reads
+            print(f"Read failures: {self.failed_reads}/{self.total_reads} ({failure_ratio:.2%})")
+            self.last_report_time = current_time  # Reset report time
+
         return self.sample_buffer
 
     def set_frequency(self, freq):
