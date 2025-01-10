@@ -146,7 +146,7 @@ class SidekiqSdr(SDR):
         """
         if self.tx_thread is not None and self.tx_thread.is_alive():
             print("A transmission is already in progress. Please wait for it to finish.")
-            return
+            return 1
 
         def transmit():
             try:

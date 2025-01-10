@@ -89,48 +89,33 @@ class HackRFSdr(SDR):
         else:
             print("Transmitted {} samples".format(len(samples)))
 
-    def transmit_data_async(self, samples, duration):
+    def transmit_data_async(self, samples, duration=1):
         """
         Transmit data asynchronously in a separate thread.
 
         Parameters:
-            samples: Complex IQ samples to be transmitted.
-            duration: Duration of the transmission in seconds.
+            samples (np.array): The samples to transmit.
+            duration (float): Duration of the transmission in seconds.
         """
-        if self.tx_stream is None:
-            self.tx_stream = self.sdr.setupStream(SoapySDR.SOAPY_SDR_TX, SoapySDR.SOAPY_SDR_CF32)
-            self.sdr.activateStream(self.tx_stream)
+        if self.tx_thread is not None and self.tx_thread.is_alive():
+            print("A transmission is already in progress. Please wait for it to finish.")
+            return 1
 
-        self.transmit_running.set()
-        self.transmit_thread = threading.Thread(target=self._async_transmit_thread, args=(samples, duration))
-        self.transmit_thread.start()
+        def transmit():
+            try:
+                num_repeats = int(self.sample_rate * duration / len(samples))
+                repeated_samples = np.tile(samples, num_repeats)
+                print(f"Transmitting {len(repeated_samples)} samples asynchronously for {duration} seconds...")
+                self.transmit_samples(repeated_samples)
+                time.sleep(duration)
+                self.stop_transmission()
+                print("Asynchronous transmission complete.")
+            except Exception as e:
+                print(f"Error during asynchronous transmission: {e}")
 
-    def _async_transmit_thread(self, samples, duration):
-        """
-        Thread function for asynchronous transmission.
-
-        Parameters:
-            samples: Complex IQ samples to be transmitted.
-            duration: Duration of the transmission in seconds.
-        """
-        num_repeats = int(self.sample_rate * duration / len(samples))
-        repeated_samples = np.tile(samples, num_repeats)
-        sample_idx = 0
-
-        start_time = time.time()
-        while time.time() - start_time < duration and self.transmit_running.is_set():
-            chunk_size = min(HackRFSdr.MAX_SAMPLES, len(repeated_samples) - sample_idx)
-            if chunk_size <= 0:
-                break
-
-            sr = self.sdr.writeStream(self.tx_stream, [repeated_samples[sample_idx:sample_idx + chunk_size]], chunk_size)
-            if sr.ret > 0:
-                sample_idx = (sample_idx + sr.ret) % len(repeated_samples)
-            else:
-                print("Transmit failed, ret={}".format(sr.ret))
-
-        self.transmit_running.clear()
-        print("Asynchronous transmission complete.")
+        self.tx_thread = threading.Thread(target=transmit)
+        self.tx_thread.daemon = True
+        self.tx_thread.start()
 
     def stop_transmission(self):
         """
